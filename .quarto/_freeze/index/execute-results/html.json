@@ -2,7 +2,7 @@
   "hash": "71ce5c79153f94f3c9bbc60eb11f9d06",
   "result": {
     "engine": "knitr",
-    "markdown": "# Preface {.unnumbered}\n\nThis is a Quarto book.\n\nTo learn more about Quarto books visit <https://quarto.org/docs/books>.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1 + 1\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 2\n```\n\n\n:::\n:::\n\n\n\n\n\n\n\n\n| Col1 | Col2 | Col3 |\n|------|------|------|\n| 1    | 9    | c    |\n| 2    | 78   | x    |\n| 3    | z    | x    |\n\n: zhc\n",
+    "markdown": "# Preface {.unnumbered}\n\nThis is a Quarto book.\n\nTo learn more about Quarto books visit <https://quarto.org/docs/books>.\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1 + 1\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 2\n```\n\n\n:::\n:::\n\n\n\n\n\n\n| Col1 | Col2 | Col3 |\n|------|------|------|\n| 1    | 9    | c    |\n| 2    | 78   | x    |\n| 3    | z    | x    |\n\n: zhc\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"
