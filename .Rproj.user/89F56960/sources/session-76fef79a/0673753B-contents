@@ -1,0 +1,82 @@
+# Global proteomics data Quality Control
+
+```{r}
+#| echo: false
+#| message: false
+#| cache: false
+
+library(spverse)
+```
+
+Data quality control of the spverse package is implemented through three sequential procedures: initial low-quality sample filtering, intermediate data normalization, and final missing value imputation.
+
+## Low-quality sample filtering
+
+First, read the data and create the sp object.
+
+```{r}
+#| echo: true
+#| message: false
+global_sp <- creatsp("D:/Rdata/zhc/article/part2/fan/s966_section/")
+
+print(global_sp)
+```
+
+The raw data contains 599 spots and 7748 features. Next, low-quality samples were excluded using the `filter_sample_sp()` function, which stores the results in the slot named `clean_data`. The times parameter retained its default setting of 1.5-fold, and the group parameter is not set.
+
+```{r}
+global_sp <- filter_sample_sp(global_sp,times = 1.5)
+
+dim(global_sp@clean_data)
+```
+
+After filtering with the filter_sample_sp() function, 28 samples were removed, leaving 571 samples remaining.
+
+```{r}
+#| label: filter_plot1
+#| fig-width: 3
+#| fig-height: 3
+#| fig-scap: |
+#|   filter_plot1.
+#| fig-cap: |
+#|   **filter_plot1.**
+
+filter_plot_sp(global_sp,times = 1.5)
+```
+
+## Data normalization
+
+If you have performed normalization in the search software, spverse does not recommend performing normalization again. We suggest first examining the overall distribution of the data to assess whether normalization is necessary.
+
+```{r}
+#| label: DS_plot1
+#| fig-width: 3
+#| fig-height: 3
+#| fig-scap: |
+#|   DS_plot1.
+#| fig-cap: |
+#|   **DS_plot1.**
+
+density_plot_sp(global_sp)
+```
+
+No significant differences were observed in the distribution of any sample compared to others in the probability density plot, so normalization is unnecessary.
+
+## Missing value imputation
+
+Next, we used the default "impseqrob" method for missing value imputation, and filtered out proteins detected in fewer than 30% of spots.
+
+```{r}
+#| label: DS_plot2
+#| fig-width: 3
+#| fig-height: 3
+#| fig-scap: |
+#|   DS_plot2.
+#| fig-cap: |
+#|   **DS_plot2.**
+global_sp <- mvi_sp(global_sp,method = "impseqrob",nmr = 0.3)
+
+density_plot_sp(global_sp)
+```
+
+After missing value imputation, the samples also exhibit a normal distribution. Thus, the data quality control process is complete.

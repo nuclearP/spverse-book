@@ -1,0 +1,140 @@
+rm(list = ls())
+
+####norm
+library(MSnbase)
+library(tidyverse)
+library(data.table)
+
+cd45_diann <- list()
+cd45_sp <- list()
+ck_diann <- list()
+ck_sp <- list()
+guo_diann <- list()
+guo_sp <- list()
+ss_diann <- list()
+ss_sp <- list()
+zhu_diann <- list()
+zhu_sp <- list()
+
+#####cd45######
+
+x <- fread("F:/test/filter_data/cd45_diann.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  cd45_diann[[j]] <- as.data.frame(k)
+}
+
+cd45_diann[["raw"]] <- as.data.frame(x)
+
+x <- fread("F:/test/filter_data/cd45_sp.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  cd45_sp[[j]] <- as.data.frame(k)
+}
+
+cd45_sp[["raw"]] <- as.data.frame(x)
+
+#####ck######
+
+x <- fread("F:/test/filter_data/ck_diann.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  ck_diann[[j]] <- as.data.frame(k)
+}
+
+ck_diann[["raw"]] <- as.data.frame(x)
+
+x <- fread("F:/test/filter_data/ck_sp.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  ck_sp[[j]] <- as.data.frame(k)
+}
+
+ck_sp[["raw"]] <- as.data.frame(x)
+
+#####cd45######
+
+x <- fread("F:/test/filter_data/nguo_diann.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  guo_diann[[j]] <- as.data.frame(k)
+}
+
+guo_diann[["raw"]] <- as.data.frame(x)
+
+x <- fread("F:/test/filter_data/nguo_sp.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  guo_sp[[j]] <- as.data.frame(k)
+}
+
+guo_sp[["raw"]] <- as.data.frame(x)
+
+#####cd45######
+
+x <- fread("F:/test/filter_data/ss_diann.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  ss_diann[[j]] <- as.data.frame(k)
+}
+
+ss_diann[["raw"]] <- as.data.frame(x)
+
+x <- fread("F:/test/filter_data/ss_sp.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  ss_sp[[j]] <- as.data.frame(k)
+}
+
+ss_sp[["raw"]] <- as.data.frame(x)
+
+#####cd45######
+
+x <- fread("F:/test/filter_data/zhu_skin_diann.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  zhu_diann[[j]] <- as.data.frame(k)
+}
+
+zhu_diann[["raw"]] <- as.data.frame(x)
+
+x <- fread("F:/test/filter_data/zhu_skin_sp.xls") %>% column_to_rownames("p")
+
+for (j in c("sum", "max", "center.mean", "center.median", "div.mean", "div.median", "quantiles", "quantiles.robust","vsn")) {
+  msnset <- MSnSet(exprs = as.matrix(x) )
+  msnset <- normalise(msnset, j)
+  k <- exprs(msnset)
+  zhu_sp[[j]] <- as.data.frame(k)
+}
+
+zhu_sp[["raw"]] <- as.data.frame(x)
+
+
+save(zhu_diann,zhu_sp,ss_diann,ss_sp,guo_diann,guo_sp,ck_diann,ck_sp,cd45_diann,cd45_sp,file = "F:/test/norm.Rdata")

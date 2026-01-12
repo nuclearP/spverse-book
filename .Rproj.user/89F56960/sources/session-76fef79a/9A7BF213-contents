@@ -1,0 +1,666 @@
+rm(list = ls())
+
+###################new_cluster
+
+library(tidyverse)
+library(clusterProfiler)
+# library(utils)
+# library(IOBR)
+library(data.table)
+library(sva)
+library(ComplexHeatmap)
+library(umap)
+library(circlize)
+library(Seurat)
+library(limma)
+library(NbClust)
+library(cluster)
+library(factoextra)
+library(jjAnno)
+library(ggpubr)
+library(CellChat)
+
+
+removeRowsAllNa  <- function(x){x[apply(x, 1, function(y) any(!is.na(y))),]}
+
+ov <- fread("D:/software/R/Rdata/fly2/lfq/lfq.xls",sep = "\t")
+ov <- column_to_rownames(ov,"p")
+ov <- removeRowsAllNa(ov)
+perc <- ov
+# ov[ov<0] <- 0
+ov[is.na(ov)] <- min(ov,na.rm = T)
+# ov <- 2^ov
+
+
+#################combat##################
+
+batch <- str_extract(colnames(ov),"^[A-Z0-9]+")
+type <- str_extract(colnames(ov),"^[A-Z0-9]+")
+
+combat_data <- ComBat(dat=ov, batch = batch, mod=NULL, par.prior=TRUE, prior.plots=FALSE)
+combat_data <- as.data.frame(combat_data)
+
+a <- combat_data
+# colnames(a) <- str_extract(colnames(a),'[0-9]+$')
+# a[is.na(a)] <- min(a,na.rm = T)
+a <- t(a)
+a <- scale(a)
+a <- t(a) %>% as.data.frame() %>% drop_na()
+a <- t(a)
+
+# set.seed(1)
+# nb <- FindNeighbors(a)
+# xx <- FindClusters(nb$snn,resolution = 1.6)
+# xx <- xx[,1]
+# xx <- as.integer(xx)
+# # set.seed(1)
+# 
+# x <- fviz_nbclust(a, kmeans, method = "wss",k.max=20)
+# 
+# png("D:/software/R/Rdata/fly2/iq_test/lfq/bwol.png")
+# print(plot(x))
+# dev.off()
+# 
+# pdf("D:/software/R/Rdata/fly2/iq_test/lfq/bwol.pdf")
+# print(plot(x))
+# dev.off()
+# 
+set.seed(1)
+# 调用kmeans聚类算法 k = 4
+km <- kmeans(a, centers =  9, nstart = 25)
+# 查看结果
+xx <- km$cluster
+names(xx) <- NULL
+xx
+
+set.seed(1)
+label <- names(row_order(Heatmap(a,row_split = xx)))
+col_fun = colorRamp2(c(-2,-1,0,1,2), c("#1C325C","#5DA5CB", "white", "#E17962","#650923"))
+mycolor<-c("#D51F26","#272E6A","#208A42","#89288F","#F47D2B","#FEE500","#8A9FD1","#7E1416","#D8A767","#E6C2DC","black")
+col_top <- mycolor[as.numeric(label)]
+
+color_fly <- data.frame(label,col_top)
+
+top_anno <- HeatmapAnnotation(
+  
+  
+  foo = anno_block(gp = gpar(fill = col_top,col="white"),
+                   labels = label,
+                   labels_gp = gpar(col = "white")
+  ),
+  height = unit(1.2, "cm"),
+  samples = c(str_extract(colnames(combat_data),"[A-Z0-9]+")),
+  col = list(samples=c("N1"="#D51F26", "N2"="#272E6A", "N3"="#208A42", "N4"="#89288F", "N5"="#D8A767",
+                       "P1"="#FEE500", "P2"="#8A9FD1", "P3"="#7E1416", "P4"="#F47D2B", "P5"="black")),
+  annotation_legend_param = list(
+    legend_height=unit(4,"cm"), legend_direction="vertical",title_gp = gpar(fontsize = 12),
+    labels_gp =  gpar(fontsize = 12),title_position = "topleft"
+  )
+)
+
+set.seed(1)
+
+zhc <- Heatmap(t(a), name = "Normalized intensity",
+               show_row_names = F,
+               show_column_names = F,
+               col = col_fun,column_split =xx,show_row_dend = F,
+               top_annotation =top_anno,
+               row_title_gp = gpar(fontsize=10),
+               # row_names_max_width = max_text_width(colnames(gsvas)),
+               column_title =NULL,column_title_gp =  gpar(fontsize=5),
+               
+               heatmap_legend_param = list(
+                 legend_height=unit(4,"cm"), legend_direction="vertical",title_gp = gpar(fontsize = 12),
+                 labels_gp =  gpar(fontsize = 12),title_position = "topleft"
+                 # title_position = "topcenter"
+               ))
+
+png("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/heatmap.png",width = 5000,height =2500,res = 300)
+print(draw(zhc,merge_legend = TRUE))
+dev.off()
+
+pdf("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/heatmap.pdf",width = 27,height = 12)
+print(draw(zhc,merge_legend = TRUE))
+dev.off()
+
+
+############################umap##########################
+
+color_fly$label <- as.numeric(color_fly$label)
+color_fly <- arrange(color_fly,label)
+
+a <- t(combat_data)
+b <-  as.data.frame(a) %>% mutate(samples = rownames(a),pn= str_extract(rownames(a),"^[PN]"),pne = str_extract(rownames(a),"^[A-Z0-9]+"),cluster = as.character(xx)) %>% 
+  dplyr::select(where(is.character))
+b$cluster <- factor(b$cluster,levels= 1:max(as.numeric( b$cluster)))
+
+set.seed(1234)
+umap_fit <- a %>%
+  scale() %>% 
+  umap()
+
+umap_df <- umap_fit$layout %>%
+  as.data.frame()%>%
+  mutate(samples = rownames(a))%>%
+  inner_join(b, by="samples")
+
+umaps <- ggplot(umap_df,aes(x = V1, 
+                            y = V2, 
+                            color = pne))+
+  geom_point()+
+  labs(x = "UMAP1",
+       y = "UMAP2",
+       subtitle="UMAP",
+       color="patients")+
+  scale_color_manual(values =  useMyCol('grove',11)[1:11])+
+  theme_bw()
+
+
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/umaps_patient.png",umaps)
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/umaps_patient.pdf",umaps)
+
+umaps <- ggplot(umap_df,aes(x = V1, 
+                            y = V2, 
+                            color = cluster))+
+  geom_point()+
+  labs(x = "UMAP1",
+       y = "UMAP2",
+       subtitle="UMAP",
+       color="clusters")+
+  scale_color_manual(values =  color_fly$col_top)+
+  theme_bw()
+# scale_color_manual(values =  color_fly$col_top)
+
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/umaps_cluster.png",umaps)
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/umaps_cluster.pdf",umaps)
+
+######################pca######################
+set.seed(1234)
+pca_fit <- a %>%
+  scale() %>%
+  prcomp(center = T)
+# 查看成分重要性
+summary(pca_fit)
+
+# 可视化PC1和PC2
+summ1 <- summary(pca_fit)
+xlab1 <- paste0("PC1(",round(summ1$importance[2,1]*100,2),"%)")
+ylab1 <- paste0("PC2(",round(summ1$importance[2,2]*100,2),"%)")
+
+df1 <- pca_fit$x # 提取PC score
+df1 <- as.data.frame(df1) 
+df1 <- mutate(df1,samples=row.names(df1)) %>% 
+  inner_join(b,by="samples")
+
+
+p.pca1 <- ggplot(data = df1,aes(x = PC1,y = PC2,color=pne))+
+  # stat_ellipse(aes(fill = pca$x),
+  #              type = "norm",geom = "polygon",alpha = 0.25,color=NA)+ # 添加置信椭圆
+  geom_point()+
+  
+  labs(x = xlab1,y = ylab1,color = "patients",title = "PCA")+
+  theme_bw()+
+  scale_color_manual(values =  useMyCol('grove',11)[1:11])
+
+ggsave(p.pca1,filename = "D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/PCA_patient.png")
+ggsave(p.pca1,filename = "D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/PCA_patient.pdf")
+
+p.pca1 <- ggplot(data = df1,aes(x = PC1,y = PC2,color=cluster))+
+  # stat_ellipse(aes(fill = pca$x),
+  #              type = "norm",geom = "polygon",alpha = 0.25,color=NA)+ # 添加置信椭圆
+  geom_point()+
+  
+  labs(x = xlab1,y = ylab1,color = "clusters",title = "PCA")+
+  theme_bw()+
+  scale_color_manual(values =   color_fly$col_top )
+
+p.pca1
+ggsave(p.pca1,filename = "D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/PCA_cluster.png")
+ggsave(p.pca1,filename = "D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dimreduction/PCA_cluster.pdf")
+
+####循环算差异蛋白
+
+names(xx) <- colnames(combat_data)
+###构建一个s4的对象
+setClass("spverse",
+         slots = c(rawdata="data.frame",comdata = "data.frame",description = "data.frame",color = "data.frame",cluster = "numeric",dis = "numeric"))
+
+# test <- new(Class = "spverse",data= combat_data,cluster = km$cluster)
+
+test <- new(Class = "spverse",rawdata = perc,comdata= combat_data,description = b,color = color_fly,cluster = xx)
+
+dep_limma <- function(x,y){
+  
+  df <- cbind(x,y)
+  group_list = c(rep("Treat",ncol(x)),rep("Control",ncol(y)))
+  design <- model.matrix(~0+factor(group_list))
+  colnames(design)=levels(factor(group_list))
+  
+  ## 比较信息
+  contrast.matrix<-makeContrasts("Treat-Control",
+                                 levels = design)
+  contrast.matrix##查看比较矩阵的信息，这里我们设置的是Treat Vs. control
+  ## 拟合模型
+  fit <- lmFit(df,design)
+  fit2 <- contrasts.fit(fit, contrast.matrix) 
+  fit2 <- eBayes(fit2) 
+  DEG<-topTable(fit2, coef=1, n=Inf) %>% na.omit()
+}
+
+# deps <- function(x,y){
+#   dep_sample <- list()
+#   for(k in unique(y)){
+#     
+#     if(length(which(xx == k)) >= 3){
+#       cluster_case <- dplyr::select(x,which(xx == k))
+#       cluster_control <- dplyr::select(x,-colnames(cluster_case))
+#       
+#       out <- union(as.numeric(which(apply(cluster_case,1,var)==0)),as.numeric(which(apply(cluster_control,1,var)==0)))
+#       case <- cluster_case[-out,]
+#       control <- cluster_control[-out,]
+#       dep <- dep_limma(case,control)
+#       
+#       dep_sample[[paste0("cluster",k)]] <- dep
+#     }
+#   }
+#   dep_sample
+# }
+
+
+setGeneric("deps",function(object) standardGeneric("deps") )
+
+setMethod("deps","spverse",function(object){
+            dep_sample <- list()
+            for(k in unique(object@cluster)){
+              if(length(which(object@cluster == k)) >= 3){
+                
+                cluster_case <- dplyr::select(object@comdata,which(object@cluster == k))
+                cluster_control <- dplyr::select(object@comdata,-colnames(cluster_case))
+                
+                cluster_case_raw <- dplyr::select(object@rawdata,which(object@cluster == k)) %>% mutate(proportion_case = rowSums(!is.na(.)) / ncol(.),n_case=rowSums(!is.na(.))) %>% 
+                  mutate(protein = rownames(.)) %>% dplyr::select(c("proportion_case","protein","n_case"))
+                cluster_control_raw <- dplyr::select(object@rawdata,-colnames(cluster_case)) %>% mutate(proportion_control = rowSums(!is.na(.)) / ncol(.),n_control =rowSums(!is.na(.)) ) %>% 
+                  mutate(protein = rownames(.)) %>% dplyr::select(c("proportion_control","protein","n_control"))
+                
+                # out <- union(as.numeric(which(apply(cluster_case,1,var)==0)),as.numeric(which(apply(cluster_control,1,var)==0)))
+                # case <- cluster_case %>% t() %>% as.data.frame() %>% dplyr::select(-out) %>% t() %>% as.data.frame()
+                # control <- cluster_control %>% t() %>% as.data.frame() %>% dplyr::select(-out) %>% t() %>% as.data.frame()
+                
+                case <- cluster_case
+                control <- cluster_control
+                
+                dep <- dep_limma(case,control)
+                dep <- mutate(dep,case = paste0("cluster",k),protein = rownames(dep))
+                dep <- left_join(dep,cluster_case_raw) %>% left_join(.,cluster_control_raw)
+                dep_sample[[paste0("cluster",k)]] <- dep
+              }
+            }
+            dep_sample
+          }
+          )
+
+showMethods(deps)
+
+getMethod("deps","spverse")
+dep_clsuter <- deps(test)
+
+depst <- rbindlist(dep_clsuter) %>% filter(abs(logFC) > 1,`adj.P.Val` < 0.01)
+
+write_tsv(depst,"D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dep/dep_filter.xls")
+
+depst <- rbindlist(dep_clsuter) %>% filter(abs(logFC) > 1,`adj.P.Val` < 0.01) %>% group_by(case) %>% count()
+
+
+p <- ggdotchart(depst, x = "case", y = "n",                                
+                color = "blue",
+                sorting = "none",                       
+                add = "segments",                                # 按组排序
+                add.params = list(color = "lightgray", size = 5),
+                dot.size = 10,                                 
+                label = depst$n,                        # 加入mpg的值作为点标签
+                font.label = list(color = "white", size = 10, 
+                                  vjust = 0.5),      # 调整标签参数
+                ggtheme = theme_classic(),
+                rotate = T
+)+labs(x="class",y="num of unique protein")+
+  # scale_y_continuous(limits = c(0,25),expand = c(0,0))+
+  theme(axis.text.x = element_text(size = 12,colour = "black"))+
+  theme(axis.text.y = element_text(size = 12,colour = "black"))+
+  theme(axis.title.x = element_text(size = 14,margin = margin(0.2,0,0.2,0,"cm"),face = "bold"))+
+  theme(axis.title.y = element_text(size = 14,margin = margin(0,0.4,0,0.2,"cm"),face = "bold"))+
+  theme(axis.ticks = element_line(size = 0.8),axis.ticks.length = unit(.5,"lines"))+
+  theme(plot.margin = margin(.5,.5,.5,.5,unit = "cm"))
+
+# p <- p+geom_hline(yintercept = c(5,10,15),lwd=1,lty="dotdash",color="lightgray")
+
+p
+
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dep/count.png",p,width = 7,height = 5)
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dep/count.pdf",p,width = 7,height = 5)
+
+save(test,file = "D:/software/R/Rdata/fly2/iq_test/test.Rdata")
+
+save(dep_clsuter,test,file = "D:/software/R/Rdata/fly2/iq_test/lfq_kmean/dep/dep.Rdata")
+#################map#########################
+
+color_fly$label <- as.numeric(color_fly$label)
+color_fly <- arrange(color_fly,label)
+
+map_list <- list()
+
+for (i in c("N","P")) {
+  for (j in 1:5) {
+    zhc <- dplyr::filter(test@description,pne == paste0(i,j))
+    zhc$sample <- str_extract(zhc$samples,"\\d+$")
+    
+    y <- data.frame(sample=1:100,x=rep(1:10,10),y=rep(10:1,each=10))
+    y$sample <- as.character(y$sample)
+    
+    final <- full_join(y,zhc,by="sample")
+    final$cluster <- as.numeric(final$cluster)
+    # final$cluster <- factor(final$cluster,levels = sort(unique(final$cluster)))
+    final$pne[is.na(final$pne)] <- unique(final$pne)[1]
+    map_list[[paste0(i,j)]] <- final
+    
+    
+  }
+}
+
+final <- rbindlist(map_list)
+final$cluster <- factor(final$cluster,levels = sort(unique(final$cluster)))
+
+z <- ggplot(data =final,aes(x=x,y=y))+
+  geom_tile(data =final,aes(x=x,y=y),fill = "white",color = "black",size=0.8)+
+  geom_tile(data =final,aes(x=x,y=y,fill=cluster),color="black",size=0.8)+
+  facet_wrap(~pne,nrow = 2)+
+  # scale_fill_manual(values = c("#E8C5E0","#FFD217","#002E9F"))+
+  # scale_fill_gradientn(colours =colorRampPalette(c("#2556A6","#ffffff","#EE2A29"))(50))+
+  # scale_fill_gradientn(colours = brewer.pal(11,'PiYG'))+
+  scale_fill_manual(values =test@color$col_top,na.value =  "white")+
+  labs(fill = "Clusters")+
+  theme_bw()+
+  theme(panel.grid = element_blank())+
+  scale_x_continuous(name = c(1:10),breaks = 1:10)+
+  scale_y_continuous(name = c(1:10),breaks = 1:10)+
+  theme(axis.ticks = element_blank(),axis.title = element_blank(),axis.text = element_text(size = 10),axis.line = element_blank(),
+        strip.background = element_rect(fill = c("#e7e7e7")), #修改分页背景
+        strip.text.x = element_text(size = 8),legend.position = "bottom")+
+  guides(fill=guide_legend(nrow = 1))+
+  coord_fixed()
+z
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/map/map.png",z,width = 9,height = 7)
+ggsave("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/map/map.pdf",z,width = 9,height = 7)
+############################cell_chat##################################
+
+
+tt <- function (object, data.use = NULL, group.by = NULL, idents.use = NULL, 
+                invert = FALSE, group.dataset = NULL, pos.dataset = NULL, 
+                features.name = "features", only.pos = TRUE, features = NULL, 
+                return.object = TRUE, thresh.pc = 0, thresh.fc = 0, thresh.p = 0.05) 
+{
+  if (!is.list(object@var.features)) {
+    stop("Please update your CellChat object via `updateCellChat()`")
+  }
+  if (is.null(data.use)) {
+    X <- object@data.signaling
+    if (nrow(X) < 3) {
+      stop("Please check `object@data.signaling` and ensure that you have run `subsetData` and that the data matrix `object@data.signaling` looks OK.")
+    }
+  }
+  else {
+    X <- data.use
+  }
+  if (is.null(features)) {
+    features.use <- row.names(X)
+  }
+  else {
+    features.use <- intersect(features, row.names(X))
+  }
+  data.use <- X[features.use, ]
+  data.use <- as.matrix(data.use)
+  if (is.null(group.by)) {
+    labels <- object@idents
+    if (!is.factor(labels)) {
+      message("Use the joint cell labels from the merged CellChat object")
+      labels <- object@idents$joint
+    }
+  }
+  else {
+    labels <- object@meta[[group.by]]
+  }
+  if (!is.factor(labels)) {
+    labels <- factor(labels)
+  }
+  level.use <- levels(labels)[levels(labels) %in% unique(labels)]
+  if (!is.null(idents.use)) {
+    if (invert) {
+      level.use <- level.use[!(level.use %in% idents.use)]
+    }
+    else {
+      level.use <- level.use[level.use %in% idents.use]
+    }
+  }
+  numCluster <- length(level.use)
+  if (!is.null(group.dataset)) {
+    labels.dataset <- as.character(object@meta[[group.dataset]])
+    if (!(pos.dataset %in% unique(labels.dataset))) {
+      cat("Please set pos.dataset to be one of the following dataset names: ", 
+          unique(as.character(labels.dataset)))
+      stop()
+    }
+  }
+  my.sapply <- ifelse(test = future::nbrOfWorkers() == 1, yes = pbapply::pbsapply, 
+                      no = future.apply::future_sapply)
+  mean.fxn <- function(x) {
+    return(log2(mean(x)))
+  }
+  labels <- as.character(labels)
+  genes.de <- vector("list", length = numCluster)
+  for (i in 1:numCluster) {
+    features <- features.use
+    if (is.null(group.dataset)) {
+      cell.use1 <- which(labels == level.use[i])
+      cell.use2 <- base::setdiff(1:length(labels), cell.use1)
+    }
+    else {
+      cell.use1 <- which((labels == level.use[i]) & (labels.dataset == 
+                                                       pos.dataset))
+      cell.use2 <- which((labels == level.use[i]) & (labels.dataset != 
+                                                       pos.dataset))
+    }
+    thresh.min <- 0
+    pct.1 <- round(x = rowSums(data.use[features, cell.use1, 
+                                        drop = FALSE] > thresh.min)/length(x = cell.use1), 
+                   digits = 3)
+    pct.2 <- round(x = rowSums(data.use[features, cell.use2, 
+                                        drop = FALSE] > thresh.min)/length(x = cell.use2), 
+                   digits = 3)
+    data.alpha <- cbind(pct.1, pct.2)
+    colnames(x = data.alpha) <- c("pct.1", "pct.2")
+    alpha.min <- apply(X = data.alpha, MARGIN = 1, FUN = max)
+    names(x = alpha.min) <- rownames(x = data.alpha)
+    features <- names(x = which(x = alpha.min > thresh.pc))
+    if (length(x = features) == 0) {
+      next
+    }
+    data.1 <- apply(X = data.use[features, cell.use1, drop = FALSE], 
+                    MARGIN = 1, FUN = mean.fxn)
+    data.2 <- apply(X = data.use[features, cell.use2, drop = FALSE], 
+                    MARGIN = 1, FUN = mean.fxn)
+    FC <- (data.1 - data.2)
+    if (only.pos) {
+      features.diff <- names(which(FC > thresh.fc))
+    }
+    else {
+      features.diff <- names(which(abs(FC) > thresh.fc))
+    }
+    features <- intersect(x = features, y = features.diff)
+    if (length(x = features) == 0) {
+      next
+    }
+    data1 <- data.use[features, cell.use1, drop = FALSE]
+    data2 <- data.use[features, cell.use2, drop = FALSE]
+    pvalues <- unlist(x = my.sapply(X = 1:nrow(x = data1), 
+                                    FUN = function(x) {
+                                      return(wilcox.test(data1[x, ], data2[x, ])$p.value)
+                                    }))
+    pval.adj = stats::p.adjust(p = pvalues, method = "bonferroni", 
+                               n = nrow(X))
+    genes.de[[i]] <- data.frame(clusters = level.use[i], 
+                                features = as.character(rownames(data1)), pvalues = pvalues, 
+                                logFC = FC[features], data.alpha[features, , drop = F], 
+                                pvalues.adj = pval.adj, stringsAsFactors = FALSE)
+  }
+  markers.all <- data.frame()
+  for (i in 1:numCluster) {
+    gde <- genes.de[[i]]
+    if (!is.null(gde)) {
+      gde <- gde[order(gde$pvalues, -gde$logFC), ]
+      gde <- subset(gde, subset = pvalues < thresh.p)
+      if (nrow(gde) > 0) {
+        markers.all <- rbind(markers.all, gde)
+      }
+    }
+  }
+  if (only.pos & nrow(markers.all) > 0) {
+    markers.all <- subset(markers.all, subset = logFC > 0)
+  }
+  if (!is.null(group.dataset)) {
+    markers.all$datasets[markers.all$logFC > 0] <- pos.dataset
+    markers.all$datasets[markers.all$logFC < 0] <- setdiff(unique(labels.dataset), 
+                                                           pos.dataset)
+    markers.all$datasets <- factor(markers.all$datasets, 
+                                   levels = levels(factor(object@meta[[group.dataset]])))
+    markers.all <- markers.all[order(markers.all$datasets, 
+                                     markers.all$pvalues, -markers.all$logFC), ]
+  }
+  markers.all$features <- as.character(markers.all$features)
+  features.sig <- markers.all$features
+  object@var.features[[features.name]] <- features.sig
+  features.name <- paste0(features.name, ".info")
+  object@var.features[[features.name]] <- markers.all
+  if (return.object) {
+    return(object)
+  }
+  else {
+    return(markers.all)
+  }
+}
+
+
+for (i in c("N","P")) {
+  
+  for (j in 1:5) {
+    ####读取数据
+    
+    y <- dplyr::select(test@comdata,contains(paste0(i,j)))
+    
+    xx <- test@cluster[str_detect(names(test@cluster),paste0(i,j))]
+    
+    # 找出出现次数少于3次的元素
+    to_remove <- names(table(xx))[table(xx) < 3]
+    
+    # 删除出现次数少于3次的元素
+    vec_new <- xx[!(xx %in% to_remove)]
+    
+    # 查看结果
+    vec_new
+    
+    y <- dplyr::select(y,names(vec_new))
+    y <- 2^y
+    
+    symbol=bitr(                                      #ID转换
+      rownames(y),
+      fromType = "UNIPROT",
+      toType = "SYMBOL",
+      OrgDb = "org.Hs.eg.db",
+      drop = F
+    ) 
+    
+    symbol_for_gsva <- mutate(y,UNIPROT=rownames(y)) %>%
+      left_join(symbol,by = "UNIPROT") %>%
+      filter(!is.na(SYMBOL)) %>%
+      group_by(SYMBOL) %>%
+      summarise(across(where(is.numeric),sum))
+    
+    symbol_for_gsva <- column_to_rownames(symbol_for_gsva,"SYMBOL") %>% 
+      as.matrix()
+    
+    # identity = data.frame(group =pbmc3k.final$seurat_annotations   , row.names = names(pbmc3k.final$seurat_annotations)) # create a dataframe consisting of the cell labels
+    # unique(identity$group) # check the cell labels
+    meta = data.frame(labels = vec_new, row.names = names(vec_new))
+    meta$labels <- as.character(meta$labels)
+    
+    # cellchat <- createCellChat(object = expression_matrix , meta = identity ,group.by = "group")
+    
+    cellchat <- createCellChat(object =  symbol_for_gsva , meta = meta ,group.by = "labels")
+    
+    CellChatDB <- CellChatDB.human 
+    cellchat@DB <- CellChatDB
+    
+    # This step is necessary even if using the whole database
+    cellchat <- subsetData(cellchat) 
+    
+    
+    #识别过表达基因
+    cellchat <-tt(cellchat)
+    #识别过表达配体受体对
+    cellchat <- identifyOverExpressedInteractions(cellchat)
+    
+    
+    
+    cellchat <- computeCommunProb(cellchat, raw.use = TRUE) 
+    # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
+    cellchat <- filterCommunication(cellchat, min.cells = 3)
+    
+    #all the inferred cell-cell communications at the level of ligands/receptors
+    df.net <- subsetCommunication(cellchat)
+    write_tsv(df.net, paste0("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/cellchat/",paste0(i,j,"_"),"cell-cell_communications_all.xls"))
+    
+    #计算每个信号通路相关的所有配体-受体相互作用的通信结果
+    cellchat <- computeCommunProbPathway(cellchat) 
+    #计算整合的细胞类型之间通信结果
+    cellchat <- aggregateNet(cellchat)
+    
+    
+    ###############################可视化
+    groupSize <- as.numeric(table(cellchat@idents))
+    
+    par(mfrow = c(1,2),xpd = T)
+    
+    xp <- netVisual_circle(cellchat@net$count, vertex.weight = groupSize, 
+                           weight.scale = T, label.edge= F, title.name = "Number of interactions")
+    
+    tryCatch({ xp <- netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, 
+                           weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")},
+             error=function(e){print("i'm loser")})
+    
+    # plot.new()
+    
+    png(paste0("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/cellchat/",i,j,"_circle_number",".","png"),width = 3000,height = 1500,res = 300)
+    
+    
+    print(xp)
+    
+    dev.off()
+    
+    ###########pdf
+    
+    
+    
+    pdf(paste0("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/cellchat/",i,j,"_circle_number",".","pdf"),width = 15,height = 15)
+    
+    # plot.new()
+    print(xp)
+    
+    dev.off()
+    
+    
+    #指定受体-配体细胞类型
+    netVisual_bubble(cellchat,remove.isolate = FALSE)
+    hh <- length(unique(df.net$interaction_name))
+    
+    ggsave(paste0("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/cellchat/",i,j,"_bubble",".","png"),height = hh*0.1)
+    ggsave(paste0("D:/software/R/Rdata/fly2/iq_test/lfq_kmean/cellchat/",i,j,"_bubble",".","pdf"),height = hh*0.1)
+  }
+}

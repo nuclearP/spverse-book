@@ -1,0 +1,17 @@
+{
+  "hash": "cfcfcfed815b73ad6cbdd017000a9c3a",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Data Quality Control\n\n\n\n\n\n\n::: {.cell}\n\n:::\n\n\n\n\n\n\nData quality control of the spverse package is implemented through three sequential procedures: initial low-quality sample filtering, intermediate data normalization, and final missing value imputation.\n\n## Low-quality sample filtering\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nx <- creatsp(\"D:/Rdata/zhc/article/part2/fan/s138\")\nprint(x)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nsp data with 144 samples for 7428 features\n```\n\n\n:::\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nx <- creatsp(\"D:/Rdata/zhc/article/part2/fan/s138\")\n\nx <- filter_sample_sp(x,times = 1.5,group= \"ts\")\n\ndensity_plot_sp(x)\n```\n\n::: {.cell-output-display}\n![**Bar plot of enriched terms.**(A) Bar1; (B) Bar2.](data_files/figure-html/Bar-1.png){fig-scap='Bar.\n' width=384}\n:::\n\n```{.r .cell-code}\np <- filter_plot_sp(x,times = 1.5,group = \"ts\")\n\np\n```\n\n::: {.cell-output-display}\n![**Bar plot of enriched terms.**(A) Bar1; (B) Bar2.](data_files/figure-html/Bar-2.png){fig-scap='Bar.\n' width=384}\n:::\n:::\n\n\n\n\n\n\n## Data normalization\n\n## Missing value imputation\n\n## References {.unnumbered}\n",
+    "supporting": [
+      "data_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

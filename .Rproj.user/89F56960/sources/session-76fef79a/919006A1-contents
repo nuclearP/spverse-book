@@ -1,0 +1,178 @@
+library(tidyverse)
+library(data.table)
+
+rm(list = ls())
+
+load("G:/test/norm.Rdata")
+
+pcv <- function(df){
+  df <- df %>%
+    pivot_longer(cols = where(is.numeric), names_to = "variable", values_to = "value") %>%
+    nest_by(variable) %>%
+    mutate(
+      pooled_cv = {
+        stats <- data %>% drop_na() %>% 
+          group_by(group) %>% 
+          summarise(n = n(), mean = mean(value,na.rm=T), sd = sd(value,na.rm = T))
+
+        pooled_sd <- sqrt(sum((stats$n - 1) * stats$sd^2) / (sum(stats$n) - nrow(stats))   )
+        overall_mean <- sum(stats$n * stats$mean) / sum(stats$n)
+        (pooled_sd / overall_mean) * 100
+      }
+    ) %>%
+    select(variable, pooled_cv)
+}
+
+#####diann####
+
+cd45_D <- list()
+
+for (i in 1:10) {
+  x <- cd45_diann[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(str_extract(row.names(x),"_[012][012]_[A-Z]"),"[A-Z]")
+  k <- pcv(x) %>% mutate(method = names(cd45_diann)[i],experiment = "cD45")
+  cd45_D[[i]] <- k
+}
+
+cd45_D <- rbindlist(cd45_D) %>% drop_na()
+
+ck_D <- list()
+
+for (i in 1:10) {
+  x <- ck_diann[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(str_extract(row.names(x),"_[012][012]_[A-Z]"),"[A-Z]")
+  k <- pcv(x) %>% mutate(method = names(ck_diann)[i],experiment = "cK")
+  ck_D[[i]] <- k
+}
+
+ck_D <- rbindlist(ck_D) %>% drop_na()
+
+guo_D <- list()
+
+# exs <- readxl::read_xlsx("F:/test/41467_2022_34824_MOESM4_ESM (1).xlsx",sheet = 12) %>% dplyr::select(3,6) %>% 
+#   set_names(c("SampleID","group"))
+
+gg <- fread("F:/test/mvi_data/n2guod_group.xls")
+
+for (i in 1:10) {
+  x <- guo_diann[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- gg$group
+  k <- pcv(x) %>% mutate(method = names(guo_diann)[i],experiment = "guo")
+  guo_D[[i]] <- k
+}
+
+guo_D <- rbindlist(guo_D) %>% drop_na()
+
+
+ss_D <- list()
+
+for (i in 1:10) {
+  x <- ss_diann[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(row.names(x),"^[A-Z][0-9]_[0-9]")
+  k <- pcv(x) %>% mutate(method = names(ss_diann)[i],experiment = "ss")
+  ss_D[[i]] <- k
+}
+
+ss_D <- rbindlist(ss_D) %>% drop_na()
+
+zhu_D <- list()
+
+for (i in 1:10) {
+  x <- zhu_diann[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(substr(row.names(x), start = 9, stop = nchar(row.names(x))),"[A-Z]+_[A-Z]+")
+  k <- pcv(x) %>% mutate(method = names(zhu_diann)[i],experiment = "zhu")
+  zhu_D[[i]] <- k
+}
+
+zhu_D <- rbindlist(zhu_D) %>% drop_na()
+
+diann_pcv <- list(cd45_D,ck_D,guo_D,ss_D,zhu_D)
+
+diann_pcv <- rbindlist(diann_pcv)
+
+colnames(diann_pcv) <- c("variable"  , "value" , "method"   ,  "experiment")
+
+diann_pcv <- mutate(diann_pcv,index = "pcv")
+
+#####sp####
+
+cd45_S <- list()
+
+for (i in 1:10) {
+  x <- cd45_sp[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(str_extract(row.names(x),"_[012][012]_[A-Z]"),"[A-Z]")
+  k <- pcv(x) %>% mutate(method = names(cd45_sp)[i],experiment = "cD45")
+  cd45_S[[i]] <- k
+}
+
+cd45_S <- rbindlist(cd45_S) %>% drop_na()
+
+ck_S <- list()
+
+for (i in 1:10) {
+  x <- ck_sp[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(str_extract(row.names(x),"_[012][012]_[A-Z]"),"[A-Z]")
+  k <- pcv(x) %>% mutate(method = names(ck_sp)[i],experiment = "cK")
+  ck_S[[i]] <- k
+}
+
+ck_S <- rbindlist(ck_S) %>% drop_na()
+
+guo_S <- list()
+
+# exs <- readxl::read_xlsx("F:/test/41467_2022_34824_MOESM4_ESM (1).xlsx",sheet = 12) %>% dplyr::select(3,6) %>% 
+#   set_names(c("SampleID","group"))
+
+gg <- fread("F:/test/mvi_data/n2guop_group.xls")
+
+for (i in 1:10) {
+  x <- guo_sp[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- gg$group
+  k <- pcv(x) %>% mutate(method = names(guo_sp)[i],experiment = "guo")
+  guo_S[[i]] <- k
+}
+
+guo_S <- rbindlist(guo_S) %>% drop_na()
+
+
+ss_S <- list()
+
+for (i in 1:10) {
+  x <- ss_sp[[i]] 
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(row.names(x),"^[A-Z][0-9]_[0-9]")
+  k <- pcv(x) %>% mutate(method = names(ss_sp)[i],experiment = "ss")
+  ss_S[[i]] <- k
+}
+
+ss_S <- rbindlist(ss_S) %>% drop_na()
+
+zhu_S <- list()
+
+for (i in 1:10) {
+  x <- zhu_sp[[i]]
+  x <- t(x) %>% as.data.frame()
+  x$group <- str_extract(substr(row.names(x), start = 9, stop = nchar(row.names(x))),"[A-Z]+_[A-Z]+")
+  k <- pcv(x) %>% mutate(method = names(zhu_sp)[i],experiment = "zhu")
+  zhu_S[[i]] <- k
+}
+
+zhu_S <- rbindlist(zhu_S) %>% drop_na()
+
+sp_pcv <- list(cd45_S,ck_S,guo_S,ss_S,zhu_S)
+
+sp_pcv <- rbindlist(sp_pcv)
+
+colnames(sp_pcv) <- c("variable"  , "value" , "method"   ,  "experiment")
+
+sp_pcv <- mutate(sp_pcv,index = "pcv")
+
+save(diann_pcv,sp_pcv,file = "F:/test/pcv.Rdata")

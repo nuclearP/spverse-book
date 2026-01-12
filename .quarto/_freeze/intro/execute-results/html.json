@@ -1,8 +1,8 @@
 {
-  "hash": "e514ad799b2b10ced9d02b36ca26bbd2",
+  "hash": "bf2fa00559c613025a6ea24d6883f983",
   "result": {
     "engine": "knitr",
-    "markdown": "# Introduction\n\nThis is a book created from markdown and executable code.\n\nSee @knuth84 for additional discussion of literate programming.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1 + 1\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 2\n```\n\n\n:::\n:::\n",
+    "markdown": "# Introduction\n\nSpatial omics is a frontier that provides plentiful information regarding gene expression and functions with characteristics of spatial distribution, of which the technology and bioinformatics related to spatial transcriptomics have reached a maturation level, whereas that in spatial proteomics is still at an infant phase. As spatial proteome sampling from tissues and identifying as well as quantifying on peptides are so different from spatial transcriptome, all the procedures of data analysis are reasoned a proteome specific mode. Besides, the ideas on mining the spatial information of transcriptomes and the datasets of single cell transcriptomes should be used as references to develop informatic tool of spatial proteomics. Herein, we have elaborated a workflow of data analysis towards spatial proteomics with R package, termed as spverse.\n\nThe spverse package not only enables data quality control but also fully accounts for the impact of individual variation on data analysis while providing corresponding strategies to mitigate such variation. Furthermore, it offers tailored analytical frameworks for both local and global spatial proteomics, respectively.\n\n## **Installation**\n\nPlease note, you may find the [SeqKnn](https://github.com/cran/SeqKnn) package can not be installed rightly as it has not been updated for a long time. If so, please download this package from here: [SeqKnn_1.0.1.tar.gz](https://github.com/nuclearP/spverse/blob/main/SeqKnn_1.0.1.tar.gz).\n\n\n\n\n\n\n\n\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

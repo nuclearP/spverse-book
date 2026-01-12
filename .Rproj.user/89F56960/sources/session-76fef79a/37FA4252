@@ -1,0 +1,31 @@
+{
+    "id": "37FA4252",
+    "path": "~/spverse/vignettes/tools2.qmd",
+    "project_path": null,
+    "type": "quarto_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1767105288795.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "rmdVisualMode": "true",
+        "rmdVisualWrapConfigured": "true",
+        "docOutlineVisible": "1",
+        "rmdVisualCollapsedChunks": "",
+        "cursorPosition": "5,0",
+        "scrollLine": "48",
+        "rmdVisualModeLocation": "930:0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1767105206,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1767105302875,
+    "read_only": false,
+    "read_only_alternatives": []
+}

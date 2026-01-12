@@ -1,0 +1,155 @@
+library(tidyverse)
+library(data.table)
+library(CellChat)
+library(ggplot2)
+library(ggalluvial)
+library(svglite)
+library(Seurat)
+library(SeuratData)
+library(clusterProfiler)
+options(stringsAsFactors = FALSE)
+rm(list = ls())
+
+#####聚类数目
+x <- c(5,4,6,7,5,6,6,7,5,5)
+names(x) <- c(paste0("N",1:5),paste0("P",1:5))
+
+#####读取数据
+ovf <- data.table::fread("D:/software/R/Rdata/fly2/data/fly_final.xls") %>% 
+  column_to_rownames("p")
+
+#####去除全是NA的行
+removeRowsAllNa  <- function(x){x[apply(x, 1, function(y) any(!is.na(y))),]}
+
+
+for (i in c("N","P")) {
+  
+  for (j in 1:5) {
+    ####读取数据
+    
+    ov <-  dplyr::select(ovf,contains(paste0(i,j)))
+    
+    ####整理数据
+    ov[ ov<= 0 ] <- NA
+    ov <- removeRowsAllNa(ov)
+    ov[is.na(ov)] <- 0
+    
+    fi <- ov ####用于差异蛋白的计算
+    
+    ov <- t(ov)
+    ov <- scale(ov)
+    
+    #设置种子
+    set.seed(1)
+    km <- kmeans(ov, centers =  as.numeric(x[paste0(i,j)]), nstart = 25)
+    
+    # 查看结果
+    xx <- km$cluster
+    
+    ####cellchat####
+    
+    # 找出出现次数少于3次的元素
+    to_remove <- names(table(xx))[table(xx) < 3]
+    
+    # 删除出现次数少于3次的元素
+    vec_new <- xx[!xx %in% to_remove]
+    
+    # 查看结果
+    vec_new
+    
+    fi <- dplyr::select(fi,names(vec_new))
+    
+    symbol=bitr(                                      #ID转换
+      rownames(fi),
+      fromType = "UNIPROT",
+      toType = "SYMBOL",
+      OrgDb = "org.Hs.eg.db",
+      drop = F
+    ) 
+    
+    symbol_for_gsva <- mutate(fi,UNIPROT=rownames(fi)) %>%
+      left_join(symbol,by = "UNIPROT") %>%
+      filter(!is.na(SYMBOL)) %>%
+      group_by(SYMBOL) %>%
+      summarise(across(where(is.numeric),sum))
+    
+    symbol_for_gsva <- column_to_rownames(symbol_for_gsva,"SYMBOL") %>% 
+      as.matrix()
+    
+    # identity = data.frame(group =pbmc3k.final$seurat_annotations   , row.names = names(pbmc3k.final$seurat_annotations)) # create a dataframe consisting of the cell labels
+    # unique(identity$group) # check the cell labels
+    meta = data.frame(labels = vec_new, row.names = names(vec_new))
+    meta$labels <- as.character(meta$labels)
+    
+    # cellchat <- createCellChat(object = expression_matrix , meta = identity ,group.by = "group")
+    
+    cellchat <- createCellChat(object =  symbol_for_gsva , meta = meta ,group.by = "labels")
+    
+    CellChatDB <- CellChatDB.human 
+    cellchat@DB <- CellChatDB
+    
+    # This step is necessary even if using the whole database
+    cellchat <- subsetData(cellchat) 
+    
+    
+    #识别过表达基因
+    cellchat <- identifyOverExpressedGenes(cellchat)
+    #识别过表达配体受体对
+    cellchat <- identifyOverExpressedInteractions(cellchat)
+    
+    
+    
+    cellchat <- computeCommunProb(cellchat, raw.use = TRUE, population.size = TRUE) 
+    # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
+    cellchat <- filterCommunication(cellchat, min.cells = 3)
+    
+    #all the inferred cell-cell communications at the level of ligands/receptors
+    df.net <- subsetCommunication(cellchat)
+    write.csv(df.net, paste0("D:/software/R/Rdata/fly2/cellchat/",paste0(i,j,"_"),"cell-cell_communications.all.csv"))
+    
+    #计算每个信号通路相关的所有配体-受体相互作用的通信结果
+    cellchat <- computeCommunProbPathway(cellchat) 
+    #计算整合的细胞类型之间通信结果
+    cellchat <- aggregateNet(cellchat)
+    
+    
+    ###############################可视化
+    groupSize <- as.numeric(table(cellchat@idents))
+    
+    par(mfrow = c(1,2),xpd = T)
+    
+    xp <- netVisual_circle(cellchat@net$count, vertex.weight = groupSize, 
+                          weight.scale = T, label.edge= F, title.name = "Number of interactions")
+    
+    xp <- netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, 
+                          weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
+    
+    # plot.new()
+    
+    png(paste0("D:/software/R/Rdata/fly2/cellchat/test1/",i,j,"_circle_number",".","png"),width = 3000,height = 1500,res = 300)
+    
+    
+    print(xp)
+    
+    dev.off()
+    
+    ###########pdf
+    
+    
+    
+    pdf(paste0("D:/software/R/Rdata/fly2/cellchat/test1/",i,j,"_circle_number",".","pdf"),width = 15,height = 15)
+    
+    # plot.new()
+    print(xp)
+    
+    dev.off()
+
+
+    #指定受体-配体细胞类型
+    netVisual_bubble(cellchat,remove.isolate = FALSE)
+    hh <- length(unique(df.net$interaction_name))
+    
+    ggsave(paste0("D:/software/R/Rdata/fly2/cellchat/test1/",i,j,"_bubble",".","png"),height = hh*0.1)
+    ggsave(paste0("D:/software/R/Rdata/fly2/cellchat/test1/",i,j,"_bubble",".","pdf"),height = hh*0.1)
+  }
+}

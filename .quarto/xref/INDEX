@@ -10,5 +10,17 @@
   },
   "references.qmd": {
     "references.html": "fe77c44a"
+  },
+  "data.qmd": {
+    "data.html": "09f15047"
+  },
+  "data_reading.qmd": {
+    "data_reading.html": "544b900c"
+  },
+  "local_data_QC.qmd": {
+    "local_data_QC.html": "5dbc438b"
+  },
+  "global_data_QC.qmd": {
+    "global_data_QC.html": "feca3cfa"
   }
 }

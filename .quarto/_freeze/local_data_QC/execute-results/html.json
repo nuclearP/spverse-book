@@ -1,0 +1,17 @@
+{
+  "hash": "12aac03a2a51f0b9beb19927a214f3c9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Local proteomics data Quality Control\n\n\n\n\n\n\n\n\n::: {.cell}\n\n:::\n\n\n\n\n\n\n\n\nData quality control of the spverse package is implemented through three sequential procedures: initial low-quality sample filtering, intermediate data normalization, and final missing value imputation.\n\n## Low-quality sample filtering\n\nFirst, read the data and create the sp object.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlocal_sp <- creatsp(\"D:/Rdata/zhc/article/part2/fan/s138\")\n\nprint(local_sp)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nsp data with 144 samples for 7428 features\n```\n\n\n:::\n:::\n\n\n\n\n\n\n\n\nThe raw data contains 144 spots and 7428 features. Next, low-quality samples were excluded using the `filter_sample_sp()` function, which stores the results in the slot named `clean_data`. The times parameter retained its default setting of 1.5-fold, and the \"ts\" column in the sample_features slot was designated as the grouping variable for the group parameter.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlocal_sp <- filter_sample_sp(local_sp,times = 1.5,group= \"ts\")\n\ndim(local_sp@clean_data)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 7428  133\n```\n\n\n:::\n:::\n\n\n\n\n\n\n\n\nAfter filtering with the filter_sample_sp() function, 11 samples were removed, leaving 133 samples remaining.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfilter_plot_sp(local_sp,times = 1.5,group = \"ts\")\n```\n\n::: {.cell-output-display}\n![**filter_plot1.**](local_data_QC_files/figure-html/filter_plot1-1.png){fig-scap='filter_plot1.\n' width=432}\n:::\n:::\n\n\n\n\n\n\n\n\n## Data normalization\n\nIf you have performed normalization in the search software, spverse does not recommend performing normalization again. We suggest first examining the overall distribution of the data to assess whether normalization is necessary.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndensity_plot_sp(local_sp)\n```\n\n::: {.cell-output-display}\n![**DS_plot1.**](local_data_QC_files/figure-html/DS_plot1-1.png){fig-scap='DS_plot1.\n' width=288}\n:::\n:::\n\n\n\n\n\n\n\n\nNo significant differences were observed in the distribution of any sample compared to others in the probability density plot, so normalization is unnecessary.\n\n## Missing value imputation\n\nNext, we used the default \"impseqrob\" method for missing value imputation, and filtered out proteins detected in fewer than 30% of spots.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlocal_sp <- mvi_sp(local_sp,method = \"impseqrob\",nmr = 0.3)\n\ndensity_plot_sp(local_sp)\n```\n\n::: {.cell-output-display}\n![**DS_plot2.**](local_data_QC_files/figure-html/DS_plot2-1.png){fig-scap='DS_plot2.\n' width=288}\n:::\n:::\n\n\n\n\n\n\n\n\nAfter missing value imputation, the samples also exhibit a normal distribution. Thus, the data quality control process is complete.\n",
+    "supporting": [
+      "local_data_QC_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

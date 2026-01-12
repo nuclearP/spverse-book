@@ -1,0 +1,165 @@
+#' the sp class
+#'
+#' class designed for one experiment.
+#'
+#' @slot rawdata data.frame. Raw spatial proteomics expression matrix,
+#' with rows representing feature names and columns representing sample names.
+#' @slot sample_features data.frame. Includes read sample characteristics
+#' such as sample prior grouping, possible spatial location information,
+#' and partial sample features obtained via initial computations.
+#' @slot protein_features data.frame. Statistical information of
+#' different proteins obtained through initial calculations.
+#' @slot clean_data data.frame. The protein expression matrix after low-quality
+#' sample filtering and missing value imputation.
+#' @slot dim_reductions list. Results of data dimensionality reduction, including PCA, PLS-DA and UMAP.
+#' @slot corrective_PCA data.frame. Results of raw PCA after Harmony correction.
+#' @slot RID_bootstrap data.frame. The protein expression matrix with high
+#' individual variability removed via bootstrap resampling.
+#' @slot cmeans_list "list". Results of c-means clustering.
+#' @slot ssgsea_list list. Rows represent biological pathway names, columns
+#' represent sample names, and values indicate pathway expression intensity.
+#' @slot GSEA_list list. GSEA outcomes, with genes ranked by their contribution
+#' to distinct principal components in PCA or PLS-DA.
+#' @slot adj_matrix_list list. The list contains spatial adjacency matrices for different individuals.
+#' @slot list_neighbour list. This list contains listw tables for different individuals,
+#' where each table records the spots and their corresponding neighboring spots.
+#' @slot combine_listw ANY. Concatenated from the rearranged listw tables in list_neighbour,
+#' containing neighbor relationship listw tables for all spots.
+#' @slot deconvolution_result data.frame. This is the deconvolution result,
+#' and the dataframe contains the proportion of different cell types in each spot.
+#' @export
+
+sp <- setClass(
+  "sp",
+  slots = list(
+    rawdata = "data.frame",
+    sample_features = "data.frame",
+    protein_features = "data.frame",
+    clean_data = "data.frame",
+    dim_reductions = "list",
+    corrective_PCA = "data.frame",
+    RID_bootstrap  = "data.frame",
+    cmeans_list = "list",
+    ssgsea_list = "list",
+    GSEA_list = "list",
+    adj_matrix_list = "list",
+    list_neighbour = "list",
+    combine_listw = "ANY",
+    deconvolution_result = "data.frame"
+  ),
+  validity = function(object) {
+    if (is.null(object@combine_listw)) {
+      return(TRUE)
+    }
+    if (!inherits(object@combine_listw, "listw")) {
+      return("combine_listw must be of the 'listw' type (S3) from the spdep package or NULL")
+    }
+    TRUE
+  }
+)
+
+#' creatsp
+#'
+#' creat sp class
+#'
+#' @param pathway The path where the original data is stored
+#' @param filetype File extension
+#'
+#' @return a sp class
+#' @export
+creatsp <- function(
+  pathway,
+  filetype = "xls"
+){
+  rawdata <- paste0(pathway,"/","rawdata.",filetype)
+  feature <- paste0(pathway,"/","feature.",filetype)
+  location <- paste0(pathway,"/","location.xlsx")
+
+  if(!file.exists(rawdata)){
+    stop("Original data not found")
+  }
+  #rawdata
+  rawdata <- fread(rawdata) %>% as.data.frame()
+  rownames(rawdata) <- rawdata[["Proteins"]]
+  rawdata <- subset(rawdata,select = -Proteins)
+  #sample_features
+  sample_features <- colSums(!is.na(rawdata)) %>% as.data.frame()
+  colnames(sample_features) <- "num"
+  sample_features[["samples"]] <- row.names(sample_features)
+  sample_features[["means"]] <- apply(rawdata,2,mean,na.rm = T)
+  sample_features[["cvs"]] <- apply(rawdata,2,removena_cv)
+  #protein_feature
+  protein_features <- rowSums(!is.na(rawdata)) %>% as.data.frame()
+  colnames(protein_features) <- "num"
+  protein_features[["samples"]] <- row.names(protein_features)
+  protein_features[["means"]] <- apply(rawdata,1,mean,na.rm = T)
+  protein_features[["cvs"]] <- apply(rawdata,1,removena_cv)
+
+  ####merge
+  if(!file.exists(feature)){
+    stop("feature data not found")
+  }
+  feature <- fread(feature) %>% as.data.frame()
+  sample_features <- merge(feature,sample_features,by = "samples")
+
+  #creat_object
+  if(!file.exists(location)){
+    object <- new(Class = "sp",rawdata = rawdata,sample_features = sample_features,protein_features = protein_features)
+  }else{
+    location <- paste0(pathway,"/","location.xlsx")
+    location <- creat_coordinate(location)
+    sample_features <- merge(location,sample_features,by = "samples")
+    order_idx <- match(colnames(rawdata),sample_features$samples)
+    sample_features <- sample_features[order_idx, ]
+    object <- new(Class = "sp",rawdata = rawdata,sample_features = sample_features,protein_features = protein_features)
+  }
+  return(object)
+}
+
+creat_coordinate <- function(pathway){
+
+  sheet_names <- excel_sheets(pathway)
+  all_sheets <- lapply(sheet_names, read_excel, path = pathway,col_names = F)
+  names(all_sheets) <- sheet_names
+
+  fi <- list()
+  for (i in 1:length(sheet_names)) {
+    matrix_sheet <- as.matrix(all_sheets[[i]])
+    valid_cells <- !is.na(matrix_sheet)
+    ####location
+    valid_indices <- which(valid_cells, arr.ind = TRUE) %>% as.data.frame()
+    valid_indices[["row"]] <- (max(valid_indices$row)+1) - valid_indices$row
+    valid_indices["samples"] <- na.omit(as.vector(matrix_sheet))
+    # valid_indices[["individual"]] <- sheet_names[i]
+    names(valid_indices) <- c("y","x","samples")
+    fi[[i]] <- valid_indices
+  }
+  fi <- do.call(rbind,fi)
+}
+
+
+##' @importFrom methods show
+#' @exportMethod show
+setMethod(
+  f = 'show',
+  signature = 'sp',
+  definition = function(object) {
+    cat(
+      class(object)[1],
+      'data with',
+      ncol(object@rawdata),
+      'samples for',
+      nrow(object@rawdata), 'features\n'
+    )
+}
+)
+
+#' @exportMethod dim
+setMethod(
+  f = 'dim',
+  signature = 'sp',
+  definition = function(x){
+    dim(x@rawdata)
+  }
+)
+

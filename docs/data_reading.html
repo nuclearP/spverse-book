@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Data reading – spverse-book</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./local_data_QC.html" rel="next">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-8da5b4427184b79ecddefad3d342027e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./data_reading.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Data reading</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="https://github.com/nuclearP/spverse/" class="sidebar-logo-link">
+      <img src="./images/sp.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">spverse-book</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/nuclearP/spverse/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data_reading.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Data reading</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Local Spatial Proteomics Data Analysis</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./local_data_QC.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Data Quality Control</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Global Spatial Proteomics Data Analysis</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./global_data_QC.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Data Quality Control</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#local-spatial-proteomics-reading" id="toc-local-spatial-proteomics-reading" class="nav-link active" data-scroll-target="#local-spatial-proteomics-reading"><span class="header-section-number">2.1</span> Local spatial proteomics reading</a></li>
+  <li><a href="#global-spatial-proteomics-reading" id="toc-global-spatial-proteomics-reading" class="nav-link" data-scroll-target="#global-spatial-proteomics-reading"><span class="header-section-number">2.2</span> Global spatial proteomics reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Data reading</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>spverse reads the data provided by the user into the R environment and constructs it into an S4-class sp object. All subsequent analyses are performed based on this sp object.</p>
+<section id="local-spatial-proteomics-reading" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="local-spatial-proteomics-reading"><span class="header-section-number">2.1</span> Local spatial proteomics reading</h2>
+<ul>
+<li><p>Two files are required from the user for analyzing local spatial proteomics data.</p></li>
+<li><p>One is a tab-delimited text file named “rawdata” (Table 1 shows the internal format of rawdata): the first column has a fixed header “Proteins”, containing IDs of different proteins or genes; the remaining columns have non-fixed headers corresponding to different spot names, and the values in these columns represent proteomic expression levels. (Note: spverse requires users to input data that has undergone log2 transformation.)</p></li>
+</ul>
+<table class="caption-top table">
+<caption>Table 1</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Proteins</th>
+<th style="text-align: center;">sample1</th>
+<th style="text-align: center;">sample2</th>
+<th style="text-align: center;">sample3</th>
+<th style="text-align: center;">sample4</th>
+<th style="text-align: center;">sample5</th>
+<th style="text-align: center;">… …</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">p1</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">p1</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">p3</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">p4</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">p5</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">p6</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">p7</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+<td style="text-align: center;">xx</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The other file is a tab-delimited text file named “feature” (Table 2 illustrates its internal format): the first column has a fixed header “samples”, containing names of different spots; the remaining columns have non-fixed headers, and their contents correspond to the attribute features of the spot in that row, such as which individual it originates from and its prior classification.</li>
+</ul>
+<table class="caption-top table">
+<caption>Table 2</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">samples</th>
+<th style="text-align: center;">individual</th>
+<th style="text-align: center;">tumor_stroma</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">sample1</td>
+<td style="text-align: center;">individual1</td>
+<td style="text-align: center;">tumor</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">sample2</td>
+<td style="text-align: center;">individual1</td>
+<td style="text-align: center;">stroma</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">sample3</td>
+<td style="text-align: center;">individual1</td>
+<td style="text-align: center;">tumor</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">sample4</td>
+<td style="text-align: center;">individual1</td>
+<td style="text-align: center;">stroma</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">sample5</td>
+<td style="text-align: center;">individual1</td>
+<td style="text-align: center;">tumor</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">sample6</td>
+<td style="text-align: center;">individual1</td>
+<td style="text-align: center;">stroma</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+<td style="text-align: center;">… …</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>When reading the data, the two aforementioned files must be stored in the same folder. This folder path is passed as the “pathway” parameter to the creatsp() function. The creatsp() function also has a “filetype” parameter, which represents the file extension (suffix) of the input files.</li>
+<li><img src="images/local_data.png" class="img-fluid"></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>local_sp <span class="ot">&lt;-</span> <span class="fu">creatsp</span>(<span class="st">"D:/Rdata/zhc/article/part2/fan/s138"</span>,<span class="at">filetype =</span> <span class="st">"xls"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(local_sp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sp data with 144 samples for 7428 features</code></pre>
+</div>
+</div>
+<ul>
+<li>The imported raw protein expression data is stored in the slot named <code>rawdata</code>.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(local_sp<span class="sc">@</span>rawdata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            N1_1-11  N1_1-12  N1_1-13   N1_1-14   N1_1-15   N1_1-16   N1_1-17
+A0A075B6H9 8.474703 9.499059 8.785155 12.414688 13.161171 11.720077 11.429131
+A0A075B6I0 6.867298 7.067208 6.849651  6.793079  7.444539  6.574342  6.472642
+A0A075B6J9 5.411592 5.173726 4.794931  5.301442  5.763530  4.649232        NA
+A0A075B6K2 3.710923       NA       NA  4.127387        NA        NA        NA
+A0A075B6K4 5.886766 5.846282 5.547021  5.759162  6.261028  5.637051  5.580218
+A0A075B6K5 5.624277 5.921010 5.199026  6.009886  6.525636  5.540127  5.859418
+             N1_1-18   N1_1-19  N1_1-20  N1_1-21   N1_1-22   N1_2-11   N1_2-12
+A0A075B6H9 11.881994 12.249536 8.613011 9.327196 10.678889 15.667441 15.919244
+A0A075B6I0  6.803750  6.745124 7.517604 7.531681  6.743114 11.197273 11.765636
+A0A075B6J9  5.753880  5.114896 5.040972 6.323951  4.824248  7.714746  9.232182
+A0A075B6K2        NA  4.197648 4.277510 4.603449        NA  7.717506  8.850301
+A0A075B6K4  5.767097  5.513427 5.968147 6.287270  5.457258  9.979352 10.546669
+A0A075B6K5  5.558962  5.717246 6.325342 6.397137  5.804877 10.313574 10.539511
+             N1_2-13   N1_2-14   N1_2-15   N1_2-16   N1_2-17   N1_2-18
+A0A075B6H9 15.322222 15.217496 13.927722 15.473657 12.580478 12.648063
+A0A075B6I0 11.202373 11.248219 10.581170 11.960973 10.567210 10.447906
+A0A075B6J9  8.751367  8.888869  7.691024  9.473875  7.930623  7.772990
+A0A075B6K2  8.386476  8.548910  8.117107  9.342531  7.881595  8.047332
+A0A075B6K4 10.089257 10.177814  9.144018 10.634440  9.266425  9.327247
+A0A075B6K5 10.440473 10.645758  9.670000 10.826482  9.792844  9.847210
+             N1_2-19   N1_2-20   N1_2-21   N1_2-22  N2_1-11 N2_1-12  N2_1-13
+A0A075B6H9 13.224027 12.146169 10.408711 14.899274 5.967562      NA 7.003577
+A0A075B6I0 10.664634 11.067228  9.915960 11.648137 5.003117      NA 5.963721
+A0A075B6J9  9.000817  8.156635  7.548385  9.929832 5.345243      NA 4.405344
+A0A075B6K2  8.119788        NA  7.290159  8.856957       NA      NA 3.659464
+A0A075B6K4  9.459425  9.845537  8.576126 10.214539 5.206099      NA 6.241992
+A0A075B6K5  9.866661 10.257880  9.083679 10.717380 3.837363      NA 5.138194
+            N2_1-14  N2_1-15  N2_1-16  N2_1-17  N2_1-18  N2_1-19  N2_1-20
+A0A075B6H9 7.518226 5.288165 5.520438 4.923534 5.581278 6.327177 7.478687
+A0A075B6I0 6.518871       NA       NA       NA       NA       NA 6.183934
+A0A075B6J9       NA       NA 2.761738       NA       NA       NA 4.461236
+A0A075B6K2       NA       NA       NA       NA       NA       NA 4.107261
+A0A075B6K4 6.305775 4.533868 4.883211 4.963124 4.809912 5.441349 6.604844
+A0A075B6K5 6.234811 3.392926 3.832933 4.020750 4.739800 4.487020 5.544942
+            N2_1-21  N2_1-22  N2_2-11  N2_2-12  N2_2-13  N2_2-14  N2_2-15
+A0A075B6H9 5.091268 6.939337 9.778879 9.175664 8.450348 7.259369 6.928311
+A0A075B6I0       NA 5.801972 7.957112       NA 7.139250 6.274259 6.111713
+A0A075B6J9       NA       NA 5.853537 4.921886 6.064773 4.563402 3.947981
+A0A075B6K2       NA 3.305556       NA 5.250257 5.663554 4.497371 4.386012
+A0A075B6K4 5.320771 5.791004 8.475808 7.802288 7.622681 6.029836 6.341426
+A0A075B6K5 4.285481 4.925764 8.362614 7.735078 6.889493 6.038471 5.434141
+            N2_2-16  N2_2-17  N2_2-18  N2_2-19  N2_2-20  N2_2-21  N2_2-22
+A0A075B6H9 7.578197 9.028006 8.653360 7.888911 8.196567 6.788046 7.940889
+A0A075B6I0 6.338711 7.407156 7.133082 6.540763 7.275704 5.539702 7.162091
+A0A075B6J9 4.898237       NA 5.536787 5.060173 5.927664       NA       NA
+A0A075B6K2       NA 6.213282 5.463000 4.055650 4.364168       NA 5.204971
+A0A075B6K4 6.669146 8.081389 7.979071 7.053441 7.200382 5.813587 7.428008
+A0A075B6K5 6.104365 7.378190 7.006243 6.641433 6.685727 5.375332 6.664885
+            N5_1-11  N5_1-12  N5_1-13  N5_1-14  N5_1-15  N5_1-16  N5_1-17
+A0A075B6H9 6.583680 6.480194 5.489319 5.905465 6.031421 6.583196 5.460192
+A0A075B6I0 6.563919 6.593046 6.226301 6.190450 6.068972 6.837802 6.001926
+A0A075B6J9 4.220516       NA 6.295460 6.118923 3.961637 5.138979       NA
+A0A075B6K2 5.174246 6.908876 5.369276 4.880584 4.530717 4.796846 4.109406
+A0A075B6K4 6.026022 6.281561 5.839536 5.956612 5.561913 6.304267 5.692557
+A0A075B6K5 6.510111 8.043830 6.319683 5.772054 5.756860 6.596928 5.634524
+            N5_1-18  N5_1-19  N5_1-20  N5_1-21  N5_1-22   N5_2-11   N5_2-12
+A0A075B6H9 5.564293 5.251385 5.728160 5.103266 5.454972 10.970818 10.420435
+A0A075B6I0 5.761484 5.538847 6.138815 5.392964 5.586169 10.985817 10.724596
+A0A075B6J9 4.351910       NA 3.346526 3.868490 4.452400  7.538050  7.870644
+A0A075B6K2 4.118724 3.936249 4.816290 4.103849 4.482101  9.134534  8.807921
+A0A075B6K4 5.186385 5.244871 5.646386 5.240059 5.349715  9.823665  9.521680
+A0A075B6K5 5.292597 5.177321 5.951054 5.279637 5.152645 10.151324 10.386372
+            N5_2-13   N5_2-14  N5_2-15  N5_2-16  N5_2-17   N5_2-18   N5_2-19
+A0A075B6H9 9.807995  9.963596 9.015058 9.427895 11.00459 10.073346 11.288053
+A0A075B6I0 9.836235 10.202927 9.319540 9.518559 11.26081 10.276327 11.633188
+A0A075B6J9 7.527959  7.640580 7.063350 6.614966  8.38656  7.443369  8.915308
+A0A075B6K2 8.350864  9.148763 9.080467 9.447667 10.73987 10.003650 10.608060
+A0A075B6K4 9.098888  9.251665 8.537700 8.810335 10.56926  9.737755 10.630409
+A0A075B6K5 9.693752  9.802752 9.571768 9.717627 11.28293 10.391365 11.373876
+             N5_2-20   N5_2-21  N5_2-22  P1_1-20  P1_1-21  P1_1-22  P1_2-20
+A0A075B6H9 11.528784 10.161948 8.669654 3.216914 3.125185 5.081189 6.863663
+A0A075B6I0 11.563916 10.407457 9.101878       NA 5.969081 6.099205 6.648957
+A0A075B6J9  8.815819  6.989196 6.531530 6.044071       NA       NA 4.468924
+A0A075B6K2 10.215501  8.975762 7.327773       NA       NA       NA       NA
+A0A075B6K4 10.663973  9.650372 8.618700       NA       NA 5.107145 5.929575
+A0A075B6K5 11.467047 10.208362 8.795006 4.065803 3.951106 5.146014 5.611323
+            P1_2-21  P1_2-22  P1_1-11  P1_1-12  P1_1-13  P1_1-14  P1_1-15
+A0A075B6H9 7.260071 7.472674 5.849974 5.221125 4.434250 6.002475 5.036578
+A0A075B6I0 7.869865 8.167937 5.973658 5.755787 5.457838 6.293927 5.528780
+A0A075B6J9 5.561093 5.200155 3.462954 3.977813 6.391362 5.626575       NA
+A0A075B6K2       NA       NA 2.609326       NA       NA       NA       NA
+A0A075B6K4 6.927945 7.200317 5.181778 5.097870 4.891733 5.327649 4.521223
+A0A075B6K5 6.388574 6.660398 4.294836 4.268274 3.014495 5.172935 2.999166
+            P1_1-16  P1_1-17  P1_1-18  P1_1-19  P1_2-11  P1_2-12  P1_2-13
+A0A075B6H9 4.668430 4.697290 4.715434 5.404396 7.925528 7.163652 7.226422
+A0A075B6I0 5.436456 5.619717 5.511009 5.749251 7.787679 7.475036 7.133044
+A0A075B6J9 5.627385       NA 5.149557       NA 5.374171 6.518513 3.812680
+A0A075B6K2 3.640308       NA       NA 2.564755 5.387631 4.171529 4.596102
+A0A075B6K4 5.077098 4.642101 4.951409 4.990210 6.811293 6.501802 6.239267
+A0A075B6K5 3.506232 3.568188 4.206957 4.215349 7.011010 6.724286 6.473199
+            P1_2-14  P1_2-15  P1_2-16  P1_2-17  P1_2-18  P1_2-19  P3_1-11
+A0A075B6H9 8.096953 7.217584 8.116657 7.034899 6.814093 7.631970 3.907203
+A0A075B6I0 8.299625 7.437227 8.218208 7.417073 6.815224 7.428903 5.610291
+A0A075B6J9       NA 5.278769 5.803638 5.532032 6.144029 4.740172       NA
+A0A075B6K2 5.412568 4.734273 5.304828 3.789570       NA 5.130435       NA
+A0A075B6K4 7.550622 6.793782 7.146890 6.723651 6.110218 6.849319 5.093162
+A0A075B6K5 7.558216 6.372281 6.860586 6.354623 5.909067 6.794301 2.831573
+            P3_1-12  P3_1-13  P3_1-14  P3_1-15  P3_1-16  P3_1-17  P3_1-18
+A0A075B6H9       NA       NA 4.706185 5.398897 5.732552 6.576971 5.190468
+A0A075B6I0 5.251255       NA 6.494669 7.013234 7.726040 7.624318 6.548446
+A0A075B6J9       NA       NA       NA       NA       NA       NA 5.140375
+A0A075B6K2       NA       NA       NA       NA       NA       NA       NA
+A0A075B6K4       NA 6.394572 4.652691 4.734922 5.378730 5.843353 4.719923
+A0A075B6K5 2.702912 5.262025 4.509118 5.552568 5.160577 5.563522 4.174454
+            P3_1-19  P3_1-20  P3_1-21  P3_1-22  P3_2-11  P3_2-12  P3_2-13
+A0A075B6H9 5.421266 4.567784 7.001915 5.469018 8.115290 8.471480 8.008134
+A0A075B6I0 6.769862 6.359935 8.016583 6.890002 9.200646 9.625762 9.614069
+A0A075B6J9 5.597255       NA 3.564184       NA 5.519635 6.015570 5.338975
+A0A075B6K2       NA       NA       NA       NA       NA       NA       NA
+A0A075B6K4 5.223789 4.595162 6.298715 4.781303 6.601516 7.223985 6.958841
+A0A075B6K5 4.599284 3.733936 5.985698 5.197628 7.238871 7.892514 8.063943
+            P3_2-14  P3_2-15  P3_2-16  P3_2-17  P3_2-18  P3_2-19  P3_2-20
+A0A075B6H9 8.269179 8.114472 8.080233 7.291883 7.777956 6.767301 7.602602
+A0A075B6I0 9.723865 9.661421 9.311343 8.761093 9.128477       NA 8.641932
+A0A075B6J9 4.931982 5.530205 5.316104       NA 5.040887       NA 7.197374
+A0A075B6K2 6.303981 5.026825 5.487170 4.783668 5.718681       NA 5.868099
+A0A075B6K4 6.933539 6.778157 6.764822 6.445373 6.802835 6.635723 5.804876
+A0A075B6K5 7.980906 7.909380 7.373976 7.354662 7.574495 6.605376 7.372402
+            P3_2-21  P3_2-22  P5_1-11  P5_1-12  P5_1-13  P5_1-14  P5_1-15
+A0A075B6H9 8.374045 8.538098 7.673835 7.724646 7.487061 6.250399 7.165688
+A0A075B6I0 9.415336 9.890781 8.896507 9.120331 8.616306 8.165530 8.904704
+A0A075B6J9       NA       NA 8.166882 7.690558 7.168363 5.769654 5.770205
+A0A075B6K2       NA 6.343834       NA 3.831118       NA       NA 3.307248
+A0A075B6K4 7.003091 7.484914 6.857647 6.843582 6.774080 5.696066 6.489971
+A0A075B6K5 7.581922 8.271451 6.486556 6.776268 6.469449 5.047813 5.689609
+            P5_1-16 P5_1-17  P5_1-18  P5_1-19  P5_1-20  P5_1-21  P5_1-22
+A0A075B6H9 7.406362      NA 7.024268 6.819202 7.710860 7.029694 7.940995
+A0A075B6I0 9.044795      NA 9.320038 9.211952 8.767446 8.648101 9.171046
+A0A075B6J9 6.169091      NA 5.997128 6.081724 6.858923 6.363346 7.758843
+A0A075B6K2       NA      NA       NA       NA       NA       NA       NA
+A0A075B6K4 6.822805      NA 6.251709 6.465172 6.576639 7.083514 7.157548
+A0A075B6K5 5.934037      NA 6.057209 5.442152 5.565423 6.100928 6.935636
+             P5_2-11  P5_2-12   P5_2-13   P5_2-14   P5_2-15   P5_2-16   P5_2-17
+A0A075B6H9  9.716456 6.408468  9.354129  9.201845  9.947288  9.866094  8.681903
+A0A075B6I0 11.365746 8.904470 11.094145 10.912334 11.501445 11.504517 10.838254
+A0A075B6J9  8.803909 8.209107  8.104616  7.944657  8.402671  8.087613  8.702483
+A0A075B6K2  6.206217       NA  6.106666  5.986506  6.102423  6.283411        NA
+A0A075B6K4  9.043197 7.605595  8.899206  8.896077  9.589528  9.516744        NA
+A0A075B6K5  9.031140 7.604054  9.022393  8.554160  8.943028  9.101952  8.613726
+             P5_2-18   P5_2-19   P5_2-20   P5_2-21   P5_2-22
+A0A075B6H9  9.765927  9.996353  8.897189  9.623958 10.281814
+A0A075B6I0 11.012371 11.293644 10.397453 10.945902 11.798943
+A0A075B6J9  9.582637  8.369209  7.689413  9.431461  9.497251
+A0A075B6K2  5.306327  5.891270  4.977176  5.848726  6.288980
+A0A075B6K4  8.703061  9.087552  7.931506  9.021279  9.528588
+A0A075B6K5  8.318706  8.804549  7.575727  8.682084  9.044534</code></pre>
+</div>
+</div>
+<ul>
+<li>The imported feature matrix is stored in the slot named <code>sample_features</code>. Additionally, spverse calculates several additional features and appends them to this matrix, such as the number of identified proteins and the mean protein expression level for each spot.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(local_sp<span class="sc">@</span>sample_features)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  samples individual    ts  num    means       cvs
+1 N1_1-11         N1 tumor 6479 5.209566 0.2432002
+2 N1_1-12         N1 tumor 6464 5.178775 0.2445205
+3 N1_1-13         N1 tumor 6360 5.197567 0.2362508
+4 N1_1-14         N1 tumor 6503 5.172129 0.2465583
+5 N1_1-15         N1 tumor 6477 5.188717 0.2439340
+6 N1_1-16         N1 tumor 6301 5.242122 0.2432640</code></pre>
+</div>
+</div>
+<ul>
+<li>The spverse package computes a set of statistical metrics for each protein, encompassing the count of samples where the protein was detected, along with the mean expression level and coefficient of variation of each protein.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(local_sp<span class="sc">@</span>protein_features)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           num    samples    means       cvs
+A0A075B6H9 140 A0A075B6H9 8.146981 0.3315710
+A0A075B6I0 132 A0A075B6I0 8.170975 0.2442017
+A0A075B6J9 109 A0A075B6J9 6.308350 0.2640950
+A0A075B6K2  82 A0A075B6K2 5.979558 0.3398927
+A0A075B6K4 138 A0A075B6K4 6.936107 0.2442652
+A0A075B6K5 142 A0A075B6K5 6.767544 0.3094782</code></pre>
+</div>
+</div>
+</section>
+<section id="global-spatial-proteomics-reading" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="global-spatial-proteomics-reading"><span class="header-section-number">2.2</span> Global spatial proteomics reading</h2>
+<ul>
+<li><p>Global spatial proteomics data also includes the content of the two aforementioned files. The difference is that compared with local spatial proteomics data, global spatial proteomics data additionally contains location information, which is stored in an Excel file named “location” with the suffix “.xlsx”.</p></li>
+<li><p>If your samples are derived from multiple individuals, the spatial location information of spots from different individuals is stored in separate worksheets, each named after the corresponding sample. As shown in Table 3, each worksheet contains the positional relationships between different spots.</p></li>
+</ul>
+<table class="caption-top table">
+<caption>Table 3</caption>
+<tbody>
+<tr class="odd">
+<td></td>
+<td>sample5</td>
+<td>sample11</td>
+<td>sample17</td>
+<td>sample22</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>sample1</td>
+<td>sample6</td>
+<td>sample12</td>
+<td>sample18</td>
+<td>sample23</td>
+<td>sample28</td>
+</tr>
+<tr class="odd">
+<td>sample2</td>
+<td>sample7</td>
+<td>sample13</td>
+<td>sample19</td>
+<td>sample24</td>
+<td>sample29</td>
+</tr>
+<tr class="even">
+<td>sample3</td>
+<td>sample8</td>
+<td>sample14</td>
+<td></td>
+<td>sample25</td>
+<td>sample30</td>
+</tr>
+<tr class="odd">
+<td>sample4</td>
+<td>sample9</td>
+<td>sample15</td>
+<td>sample20</td>
+<td>sample26</td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>sample10</td>
+<td>sample16</td>
+<td>sample21</td>
+<td>sample27</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>As with reading local spatial proteomics data previously, the three aforementioned files must be stored in the same folder.</li>
+<li><img src="images/global_data.png" class="img-fluid"></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>global_sp <span class="ot">&lt;-</span> <span class="fu">creatsp</span>(<span class="st">"D:/Rdata/zhc/article/part2/fan/s966_section"</span>,<span class="at">filetype =</span> <span class="st">"xls"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(global_sp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sp data with 599 samples for 7748 features</code></pre>
+</div>
+</div>
+<ul>
+<li>The imported location information is integrated into coordinate data, which corresponds to the “x” and “y” columns in the <code>sample_features</code> slot of the sp object.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(global_sp<span class="sc">@</span>sample_features)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   samples  y x individual  num    means       cvs
+1     N1_1 10 1         N1 6222 5.879781 0.2135285
+13    N1_2 10 2         N1 6359 5.746185 0.2229226
+24    N1_3 10 3         N1 6614 5.694115 0.2282357
+35    N1_4 10 4         N1 6494 5.705090 0.2264438
+46    N1_5 10 5         N1 6368 5.759014 0.2226164
+57    N1_6 10 6         N1 6329 5.812312 0.2197434</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/github\.com\/nuclearP\/spverse-book");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link" aria-label="Introduction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./local_data_QC.html" class="pagination-link" aria-label="Data Quality Control">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Data Quality Control</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

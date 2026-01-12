@@ -1,0 +1,80 @@
+---
+title: "spatial proteomics"
+format: html
+---
+
+# 豆包
+
+| **工具名称** | **核心功能** | **优势** |
+|------------------------|------------------------|------------------------|
+| `Bruker ProteoScape` | 4D-LCM-MS 数据实时检索、定量、质控 | 适配 timsTOF 平台，支持 LCM 单细胞级样本的高灵敏度定量 |
+| `GeoProteomics` | 位点表达可视化、空间聚类、HE/IHC 图像叠加、坐标映射 | 专为 LCM-MS 设计，无需编程即可完成空间热图与区域差异分析 |
+| `SPATA2（R 包）` | 空间自相关（Moran's I）、细胞类型反卷积、位点注释 | 高度灵活，可嵌入 spverse 流程，支持自定义 LCM 位点空间脚本 |
+| `spatialLIBD（R 包）` | 空间聚类、共表达网络、转录组 - 蛋白组整合 | 适配 LCM 高通量位点数据，可解析位点的细胞组成与功能模块 |
+| `MSiReader` | 质谱成像 + LCM 位点整合、空间分布挖掘、亚细胞定位 | 开源，支持多批次 LCM 样本合并分析，兼容主流成像格式 |
+| `pRoloc（R/Bioconductor）` | 亚细胞定位预测、空间蛋白聚类、机器学习分类 | 适合 LCM 位点的蛋白亚定位与功能聚类分析 |
+| `Scaffold Spatial` | 定量、空间注释、可视化、多组学整合 | 商业化一站式平台，支持 LCM 与空间转录组数据联合分析 |
+| `Galaxy（Proteomics 模块）` | 开源工作流搭建、质控→定量→差异→可视化 | 无需编程，可自定义 LCM-MS 分析流程，适合团队协作 |
+| `PLATO（Flow2Spatial）` | 微流控 - LCM-MS 数据深度学习重建、空间分布预测 | 适合高分辨率 LCM 切片的蛋白质空间模式推断 |
+
+-   `Bruker ProteoScape`
+
+![](C:/Users/76512/Documents/spverse/vignettes/buruker.png){width="683"}
+
+-   `GeoProteomics`
+
+![](C:/Users/76512/Documents/spverse/vignettes/geop.png)
+
+![](C:/Users/76512/Documents/spverse/vignettes/geo2.png)
+
+-   `SPATA2（R 包）`
+
+![](C:/Users/76512/Documents/spverse/vignettes/spata2.png)
+
+![](C:/Users/76512/Documents/spverse/vignettes/spata2_article.png)
+
+-   `spatialLIBD（R 包）`
+
+![](C:/Users/76512/Documents/spverse/vignettes/LIBD.png)
+
+-   `MSiReader`
+
+![](C:/Users/76512/Documents/spverse/vignettes/msireader.png)
+
+-   `pRoloc`
+
+![](C:/Users/76512/Documents/spverse/vignettes/pRoloc.png)
+
+![](C:/Users/76512/Documents/spverse/vignettes/pRoloc2.png)
+
+-   `Scaffold Spatial`
+
+![](C:/Users/76512/Documents/spverse/vignettes/Scaffold_Spatial.png)
+
+-   `Galaxy（Proteomics 模块）`
+
+![](C:/Users/76512/Documents/spverse/vignettes/galaxy.png)
+
+-   `PLATO（Flow2Spatial）`
+
+![](C:/Users/76512/Documents/spverse/vignettes/plato.png)
+
+# GPT
+
+| 阶段     | 典型工具                          | 功能              |
+|----------|-----------------------------------|-------------------|
+| 空间解析 | `pRoloc, Aivia, MAPS, scProAtlas` | 组织/区域空间分析 |
+
+-   `Aivia`
+
+![](C:/Users/76512/Documents/spverse/vignettes/AIvia.png)
+
+![](C:/Users/76512/Documents/spverse/vignettes/AIvia2.png)
+
+-   `MAPS`
+
+![](C:/Users/76512/Documents/spverse/vignettes/masp.png)
+
+-   `scProAtlas`
+
+![](C:/Users/76512/Documents/spverse/vignettes/scProAtlas.png)

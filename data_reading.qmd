@@ -1,0 +1,110 @@
+# Data reading
+
+```{r}
+#| echo: false
+#| message: false
+#| cache: false
+
+library(spverse)
+```
+
+spverse reads the data provided by the user into the R environment and constructs it into an S4-class sp object. All subsequent analyses are performed based on this sp object.
+
+## Local spatial proteomics reading
+
+-   Two files are required from the user for analyzing local spatial proteomics data.
+
+-   One is a tab-delimited text file named "rawdata" (Table 1 shows the internal format of rawdata): the first column has a fixed header "Proteins", containing IDs of different proteins or genes; the remaining columns have non-fixed headers corresponding to different spot names, and the values in these columns represent proteomic expression levels. (Note: spverse requires users to input data that has undergone log2 transformation.)
+
+| Proteins | sample1 | sample2 | sample3 | sample4 | sample5 | ... ... |
+|:--------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+|    p1    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+|    p1    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+|    p3    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+|    p4    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+|    p5    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+|    p6    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+|    p7    |   xx    |   xx    |   xx    |   xx    |   xx    |   xx    |
+| ... ...  | ... ... | ... ... | ... ... | ... ... | ... ... | ... ... |
+
+: Table 1
+
+-   The other file is a tab-delimited text file named "feature" (Table 2 illustrates its internal format): the first column has a fixed header "samples", containing names of different spots; the remaining columns have non-fixed headers, and their contents correspond to the attribute features of the spot in that row, such as which individual it originates from and its prior classification.
+
+| samples | individual  | tumor_stroma |
+|:-------:|:-----------:|:------------:|
+| sample1 | individual1 |    tumor     |
+| sample2 | individual1 |    stroma    |
+| sample3 | individual1 |    tumor     |
+| sample4 | individual1 |    stroma    |
+| sample5 | individual1 |    tumor     |
+| sample6 | individual1 |    stroma    |
+| ... ... |   ... ...   |   ... ...    |
+
+: Table 2
+
+-   When reading the data, the two aforementioned files must be stored in the same folder. This folder path is passed as the "pathway" parameter to the creatsp() function. The creatsp() function also has a "filetype" parameter, which represents the file extension (suffix) of the input files.
+-   ![](images/local_data.png)
+
+```{r}
+#| echo: true
+local_sp <- creatsp("D:/Rdata/zhc/article/part2/fan/s138",filetype = "xls")
+
+print(local_sp)
+```
+
+-   The imported raw protein expression data is stored in the slot named `rawdata`.
+
+```{r}
+#| echo: true
+head(local_sp@rawdata)
+```
+
+-   The imported feature matrix is stored in the slot named `sample_features`. Additionally, spverse calculates several additional features and appends them to this matrix, such as the number of identified proteins and the mean protein expression level for each spot.
+
+```{r}
+#| echo: true
+head(local_sp@sample_features)
+```
+
+-   The spverse package computes a set of statistical metrics for each protein, encompassing the count of samples where the protein was detected, along with the mean expression level and coefficient of variation of each protein.
+
+```{r}
+#| echo: true
+head(local_sp@protein_features)
+```
+
+## Global spatial proteomics reading
+
+-   Global spatial proteomics data also includes the content of the two aforementioned files. The difference is that compared with local spatial proteomics data, global spatial proteomics data additionally contains location information, which is stored in an Excel file named "location" with the suffix ".xlsx".
+
+-   If your samples are derived from multiple individuals, the spatial location information of spots from different individuals is stored in separate worksheets, each named after the corresponding sample. As shown in Table 3, each worksheet contains the positional relationships between different spots.
+
+|         |          |          |          |          |          |
+|---------|----------|----------|----------|----------|----------|
+|         | sample5  | sample11 | sample17 | sample22 |          |
+| sample1 | sample6  | sample12 | sample18 | sample23 | sample28 |
+| sample2 | sample7  | sample13 | sample19 | sample24 | sample29 |
+| sample3 | sample8  | sample14 |          | sample25 | sample30 |
+| sample4 | sample9  | sample15 | sample20 | sample26 |          |
+|         | sample10 | sample16 | sample21 | sample27 |          |
+
+: Table 3
+
+-   As with reading local spatial proteomics data previously, the three aforementioned files must be stored in the same folder.
+-   ![](images/global_data.png)
+
+```{r}
+#| echo: true
+#| message: false
+global_sp <- creatsp("D:/Rdata/zhc/article/part2/fan/s966_section",filetype = "xls")
+
+print(global_sp)
+```
+
+-   The imported location information is integrated into coordinate data, which corresponds to the "x" and "y" columns in the `sample_features` slot of the sp object.
+
+```{r}
+#| echo: true
+head(global_sp@sample_features)
+```
